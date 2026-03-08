@@ -1,0 +1,73 @@
+CMidi is a C++ class that encapsulates the Linux ALSA 2.0 sound API accessed
+by including asoundlib.h and linking to library asound.
+c++17 is required for successful compilation.
+
+cmidi.cpp, cmidi.h, and midiloop.cpp, in addition to this file, README,
+are (C) Copyright 2026 by Kenneth Witt
+These files are licensed under the GPL-2.0 License
+
+An application using CMidi employs the following:
+#include "cmidi.h" (which in turn employs "#include <alsa/asoundlib.h>")
+
+==========================================================================
+CMidi : C++ class
+----History---------------------------------------------------------------
+ 12-31-2025  v0.01 Created by Kenneth Witt
+==========================================================================
+Programmer:    Kenneth Witt
+Reference:     ALSA examples by Craig Stuart <craig@ccrma.stanford.edu>
+Creation Date: Dec 31, 2025
+Last Modified: Sun May 10 17:22:43 PDT 2009
+Filenames:     cmidi.cpp, cmidi.h
+Syntax:        C++; ALSA 2.0
+$Smake:        g++ <appname>.cpp ... cmidi.cpp -lasound -o appname
+Description:	 Encapsulates ALSA MIDI API in a C++ object, CMii
+==========================================================================
+
+To create the CMidi object:
+
+CMidi(string portName = "", bool bBlockingMode = true);
+  Creates a CMidi object, opening the MIDI device port or virtual input file
+
+  Parameters:
+  string portName       May designate port, or allow CMidi to find "hw:?,0,1",
+                        where '?' is a digit in the range 1 to 4
+  bool bBlockingMode    Determines whether read() blocks.
+                        If false, read() will return a negative number -11 if no
+                        MIDI output from device was available to read.
+
+int open(bool bBlockingMode = true, bool bSilent = false)
+  Opens the MIDI device port or virtual input file.
+  GENERALLY, DO NOT CALL, CMidi (above) will call
+
+  Parameters:
+  bool bBlockingMode    See above
+  bool bSilent          If true, output no logging information
+
+int write(string& s)
+  Writes bytes to the CMidi object.
+  Note that NULLs can be embedded in s for writing. MIDI uses byte values of 0.
+
+  Parameters:
+  string& s   The output string to write to CMidi object (may be empty)
+
+  RETURN:
+    >= 0  The number of bytes written
+    < 0   Write was unsuccessful (return is status code)
+
+int read()
+  Read a character from the CMidi object (device port or virtual port)
+  No parameters
+
+  RETURN:
+    >= 0  The next byte read from CMidi object
+    -11   If non-blocking, no character available to read
+    < 0   Read was unsuccessful
+             represents an error if not -11 in non-blocking mode
+
+Example source application (simply loopback demo):
+
+midiloop.cpp - echos MIDI notes, transposed (uses blocking mode)
+               credit to Craig Stuart <craig@ccrma.stanford.edu> for midiecho.c
+               which was heavily referenced to create midiloop.cpp using the
+               CMidi class.
